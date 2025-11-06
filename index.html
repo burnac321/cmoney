@@ -283,6 +283,31 @@
             display: block;
         }
 
+        /* Website list styles */
+        .website-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .website-list h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .website-item {
+            display: inline-block;
+            background: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            border: 1px solid #e9ecef;
+            font-size: 0.9em;
+            color: #495057;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -308,6 +333,15 @@
         </div>
 
         <div class="content">
+            <!-- Website List -->
+            <div class="website-list">
+                <h3>Featured Websites</h3>
+                <div class="website-item">seop.pages.dev</div>
+                <div class="website-item">cmoney.pages.dev</div>
+                <div class="website-item">makemoneyz.pages.dev</div>
+                <div class="website-item">make-mkney.pages.dev</div>
+            </div>
+
             <!-- Auto-click Button -->
             <div class="auto-click-container">
                 <button class="auto-click-btn" id="autoClickBtn">
@@ -331,7 +365,7 @@
                 </button>
             </div>
 
-            <!-- Click Container (replaces ad container) -->
+            <!-- Click Container -->
             <div class="click-container" id="clickContainer">
                 <div class="click-placeholder">Click here to simulate interaction</div>
             </div>
@@ -370,6 +404,14 @@
     </div>
 
     <script>
+        // List of target websites
+        const targetWebsites = [
+            "https://seop.pages.dev/",
+            "https://cmoney.pages.dev/", 
+            "https://makemoneyz.pages.dev/",
+            "https://make-mkney.pages.dev/"
+        ];
+
         // Auto-click functionality
         let autoClickInterval = null;
         let isAutoClickActive = false;
@@ -378,6 +420,11 @@
         let reactionClickInterval = null;
         let containerClickInterval = null;
         let closeTabTimeout = null;
+
+        // Function to get random website
+        function getRandomWebsite() {
+            return targetWebsites[Math.floor(Math.random() * targetWebsites.length)];
+        }
 
         // Function to toggle auto-click
         function toggleAutoClick() {
@@ -423,7 +470,7 @@
             const actions = [
                 () => reloadEntirePage(),
                 () => simulateRandomClick(),
-                () => openNewTab(),
+                () => openRandomWebsite(),
                 () => triggerPopUnder()
             ];
             
@@ -468,7 +515,7 @@
             }
         }
 
-        // MODIFIED: Function to auto-open same page in new tab
+        // MODIFIED: Function to auto-open random website in new tab
         function startAutoOpen() {
             // Clear any existing interval
             if (autoOpenInterval) {
@@ -480,7 +527,7 @@
             console.log(`Auto-open scheduled in ${intervalTime/1000} seconds`);
             
             autoOpenInterval = setInterval(() => {
-                openNewTab();
+                openRandomWebsite();
                 
                 // Schedule next auto-open with new random interval
                 const nextInterval = Math.floor(Math.random() * 5000) + 10000;
@@ -489,9 +536,27 @@
                 // Reset the interval
                 clearInterval(autoOpenInterval);
                 autoOpenInterval = setInterval(() => {
-                    openNewTab();
+                    openRandomWebsite();
                 }, nextInterval);
             }, intervalTime);
+        }
+
+        // NEW: Function to open random website in new tab
+        function openRandomWebsite() {
+            try {
+                const randomWebsite = getRandomWebsite();
+                console.log(`Opening random website: ${randomWebsite}`);
+                
+                // Open random website in new tab
+                const newTab = window.open(randomWebsite, '_blank');
+                
+                // If tab was successfully opened, schedule parent tab to close
+                if (newTab && !newTab.closed) {
+                    scheduleParentTabClose();
+                }
+            } catch (error) {
+                console.log('Tab opening blocked by browser:', error);
+            }
         }
 
         // MODIFIED: Function to randomly click reaction buttons
@@ -786,22 +851,6 @@
             }, 800);
         }
 
-        // MODIFIED: Function to open new tabs - ONLY OPENS SAME SITE
-        function openNewTab() {
-            try {
-                // Always open the same site in new tab
-                const newTab = window.open(window.location.href, '_blank');
-                console.log('Opened same page in new tab');
-                
-                // If tab was successfully opened, schedule parent tab to close
-                if (newTab && !newTab.closed) {
-                    scheduleParentTabClose();
-                }
-            } catch (error) {
-                console.log('Tab opening blocked by browser:', error);
-            }
-        }
-
         // NEW: Function to schedule parent tab to close after 3 seconds
         function scheduleParentTabClose() {
             // Show notification
@@ -958,4 +1007,4 @@
         window.addEventListener('load', initialize);
     </script>
 </body>
-</html>
+    </html>
