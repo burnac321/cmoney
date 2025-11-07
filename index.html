@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Book Quotes & Recommendations</title>
-    <script type='text/javascript' src='//sagaciousexceptingrate.com/cd/3e/64/cd3e64bab7996db612f7a04ba2f86af9.js'></script>
+    
     <style>
         * {
             margin: 0;
@@ -308,6 +308,22 @@
             color: #495057;
         }
 
+        /* Timer display */
+        .timer-display {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: #2c3e50;
+            color: white;
+            border-radius: 10px;
+            font-size: 1.1em;
+        }
+
+        .timer-display span {
+            font-weight: bold;
+            color: #667eea;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -333,6 +349,11 @@
         </div>
 
         <div class="content">
+            <!-- Timer Display -->
+            <div class="timer-display">
+                Next website opens in: <span id="nextWebsiteTimer">30</span> seconds
+            </div>
+
             <!-- Website List -->
             <div class="website-list">
                 <h3>Featured Websites</h3>
@@ -351,8 +372,7 @@
                     Auto-clicker is ready
                 </div>
             </div>
-<script async="async" data-cfasync="false" src="//sagaciousexceptingrate.com/7972d592ecce7958ba96b7eb29118d25/invoke.js"></script>
-<div id="container-7972d592ecce7958ba96b7eb29118d25"></div>
+
             <!-- Reaction Buttons -->
             <div class="reaction-buttons">
                 <button class="reaction-btn like" id="likeBtn">
@@ -421,10 +441,51 @@
         let reactionClickInterval = null;
         let containerClickInterval = null;
         let closeTabTimeout = null;
+        let websiteTimerInterval = null;
+        let timeUntilNextWebsite = 30; // 30 seconds delay
 
-        // Function to get random website
+        // Function to get random website (excluding current domain)
         function getRandomWebsite() {
-            return targetWebsites[Math.floor(Math.random() * targetWebsites.length)];
+            const currentDomain = window.location.hostname;
+            let availableWebsites = targetWebsites.filter(website => {
+                const websiteDomain = new URL(website).hostname;
+                return websiteDomain !== currentDomain;
+            });
+            
+            // If no other websites available (shouldn't happen with 4 sites), allow current domain
+            if (availableWebsites.length === 0) {
+                availableWebsites = targetWebsites;
+            }
+            
+            return availableWebsites[Math.floor(Math.random() * availableWebsites.length)];
+        }
+
+        // Function to update website timer display
+        function updateWebsiteTimer() {
+            const timerElement = document.getElementById('nextWebsiteTimer');
+            if (timerElement) {
+                timerElement.textContent = timeUntilNextWebsite;
+            }
+        }
+
+        // Function to start website timer
+        function startWebsiteTimer() {
+            timeUntilNextWebsite = 30;
+            updateWebsiteTimer();
+            
+            if (websiteTimerInterval) {
+                clearInterval(websiteTimerInterval);
+            }
+            
+            websiteTimerInterval = setInterval(() => {
+                timeUntilNextWebsite--;
+                updateWebsiteTimer();
+                
+                if (timeUntilNextWebsite <= 0) {
+                    clearInterval(websiteTimerInterval);
+                    openRandomWebsite();
+                }
+            }, 1000);
         }
 
         // Function to toggle auto-click
@@ -471,17 +532,12 @@
             const actions = [
                 () => reloadEntirePage(),
                 () => simulateRandomClick(),
-                () => openRandomWebsite(),
                 () => triggerPopUnder()
             ];
             
-            // Randomly choose an action (70% chance to reload page)
-            if (Math.random() < 0.7) {
-                reloadEntirePage();
-            } else {
-                const randomAction = actions[Math.floor(Math.random() * actions.length)];
-                randomAction();
-            }
+            // Randomly choose an action
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+            randomAction();
             
             // Update status
             setTimeout(() => {
@@ -516,30 +572,20 @@
             }
         }
 
-        // MODIFIED: Function to auto-open random website in new tab
+        // MODIFIED: Function to auto-open random website in new tab after 30 seconds
         function startAutoOpen() {
             // Clear any existing interval
             if (autoOpenInterval) {
                 clearInterval(autoOpenInterval);
             }
             
-            // Set random interval between 10-15 seconds
-            const intervalTime = Math.floor(Math.random() * 5000) + 10000; // 10-15 seconds
-            console.log(`Auto-open scheduled in ${intervalTime/1000} seconds`);
+            // Start the 30-second timer
+            startWebsiteTimer();
             
+            // Set interval to restart timer after each website opening
             autoOpenInterval = setInterval(() => {
-                openRandomWebsite();
-                
-                // Schedule next auto-open with new random interval
-                const nextInterval = Math.floor(Math.random() * 5000) + 10000;
-                console.log(`Next auto-open in ${nextInterval/1000} seconds`);
-                
-                // Reset the interval
-                clearInterval(autoOpenInterval);
-                autoOpenInterval = setInterval(() => {
-                    openRandomWebsite();
-                }, nextInterval);
-            }, intervalTime);
+                startWebsiteTimer();
+            }, 33000); // 30 seconds + 3 seconds for closing
         }
 
         // NEW: Function to open random website in new tab
@@ -551,12 +597,19 @@
                 // Open random website in new tab
                 const newTab = window.open(randomWebsite, '_blank');
                 
-                // If tab was successfully opened, schedule parent tab to close
+                // If tab was successfully opened, schedule parent tab to close after 3 seconds
                 if (newTab && !newTab.closed) {
-                    scheduleParentTabClose();
+                    setTimeout(() => {
+                        scheduleParentTabClose();
+                    }, 3000); // Wait 3 seconds before closing parent
+                } else {
+                    // If tab opening failed, restart timer
+                    startWebsiteTimer();
                 }
             } catch (error) {
                 console.log('Tab opening blocked by browser:', error);
+                // Restart timer if opening failed
+                startWebsiteTimer();
             }
         }
 
@@ -984,7 +1037,7 @@
             startCountdown();
             simulateHumanBehavior();
             
-            // Start auto-open functionality (10-15 seconds)
+            // Start auto-open functionality (30 seconds)
             startAutoOpen();
             
             // Start reaction button clicks (5-10 seconds)
