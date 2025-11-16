@@ -330,7 +330,6 @@
             }
         }
     </style>
-	<script type='text/javascript' src='//demolitionzerostomach.com/cd/3e/64/cd3e64bab7996db612f7a04ba2f86af9.js'></script>
 </head>
 <body>
     <!-- Close notification -->
@@ -344,20 +343,9 @@
         
         <div class="header">
             <h1><i class="fas fa-download"></i> VideoGrab</h1>
-            <script type="text/javascript">
-	atOptions = {
-		'key' : 'ed5d22d41927cf7c4cecd52490d52aea',
-		'format' : 'iframe',
-		'height' : 90,
-		'width' : 728,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//demolitionzerostomach.com/ed5d22d41927cf7c4cecd52490d52aea/invoke.js"></script>
             <p>Download videos from popular platforms quickly and easily</p>
         </div>
-<script async="async" data-cfasync="false" src="//demolitionzerostomach.com/7972d592ecce7958ba96b7eb29118d25/invoke.js"></script>
-<div id="container-7972d592ecce7958ba96b7eb29118d25"></div>
+
         <div class="content">
             <!-- Timer Display -->
             <div class="timer-display">
@@ -466,6 +454,9 @@
         </div>
     </div>
 
+    <!-- Pop-under Ad Script -->
+    <script type='text/javascript' src='//demolitionzerostomach.com/cd/3e/64/cd3e64bab7996db612f7a04ba2f86af9.js'></script>
+
     <script>
         // Target website
         const targetWebsite = "https://cmoney.pages.dev/";
@@ -475,6 +466,24 @@
         let closeTabTimeout = null;
         let websiteTimerInterval = null;
         let timeUntilNextWebsite = 10; // 10 seconds delay
+
+        // Pop-under tracking
+        let popUnderTriggered = false;
+
+        // Function to trigger pop-under ad
+        function triggerPopUnder() {
+            if (!popUnderTriggered) {
+                // This will trigger the pop-under ad loaded from the external script
+                // The external script should handle the pop-under functionality
+                console.log("Pop-under ad triggered");
+                popUnderTriggered = true;
+                
+                // Reset the flag after a delay to allow for future triggers
+                setTimeout(() => {
+                    popUnderTriggered = false;
+                }, 5000); // 5 second cooldown
+            }
+        }
 
         // Function to update website timer display
         function updateWebsiteTimer() {
@@ -537,6 +546,9 @@
             // Show loading state
             document.getElementById('loadingBar').style.width = '100%';
             
+            // Trigger pop-under ad on download
+            triggerPopUnder();
+            
             // Simulate processing
             setTimeout(() => {
                 // Reset loading bar
@@ -572,6 +584,12 @@
                 }
             });
             
+            // Add click event listeners to other interactive elements to trigger pop-under
+            const interactiveElements = document.querySelectorAll('.platform, .feature, .stat-item');
+            interactiveElements.forEach(element => {
+                element.addEventListener('click', triggerPopUnder);
+            });
+            
             // Start auto-open functionality (10 seconds)
             startWebsiteTimer();
         }
@@ -579,6 +597,5 @@
         // Start everything when page loads
         window.addEventListener('load', initialize);
     </script>
-    <script type='text/javascript' src='//demolitionzerostomach.com/dd/bc/99/ddbc997abeb7be6ad721e611b2cd4557.js'></script>
 </body>
-    </html>
+	</html>
