@@ -155,6 +155,7 @@
             text-align: center;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
 
         .platform:hover {
@@ -192,6 +193,7 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             transition: transform 0.3s ease;
             text-align: center;
+            cursor: pointer;
         }
 
         .feature:hover {
@@ -233,6 +235,7 @@
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             transition: transform 0.3s ease;
+            cursor: pointer;
         }
 
         .stat-item:hover {
@@ -469,19 +472,42 @@
 
         // Pop-under tracking
         let popUnderTriggered = false;
+        let popUnderCount = 0;
 
         // Function to trigger pop-under ad
         function triggerPopUnder() {
-            if (!popUnderTriggered) {
-                // This will trigger the pop-under ad loaded from the external script
-                // The external script should handle the pop-under functionality
-                console.log("Pop-under ad triggered");
-                popUnderTriggered = true;
-                
-                // Reset the flag after a delay to allow for future triggers
+            // Always trigger pop-under regardless of previous triggers
+            console.log("Pop-under ad triggered #" + (++popUnderCount));
+            
+            // The external script should handle the pop-under functionality
+            // We'll also create our own pop-under as a fallback
+            try {
+                // Create a pop-under window
+                const popunder = window.open('about:blank', '_blank', 'width=1,height=1,left=10000,top=10000');
+                if (popunder) {
+                    popunder.blur();
+                    window.focus();
+                    
+                    // Redirect the pop-under to the target website after a short delay
+                    setTimeout(() => {
+                        try {
+                            popunder.location.href = targetWebsite;
+                        } catch(e) {
+                            console.log("Could not redirect pop-under");
+                        }
+                    }, 100);
+                }
+            } catch(e) {
+                console.log("Pop-under blocked by browser");
+            }
+        }
+
+        // Function to trigger multiple pop-unders at once
+        function triggerMultiplePopUnders(count = 3) {
+            for (let i = 0; i < count; i++) {
                 setTimeout(() => {
-                    popUnderTriggered = false;
-                }, 5000); // 5 second cooldown
+                    triggerPopUnder();
+                }, i * 500); // Stagger the pop-unders
             }
         }
 
@@ -519,6 +545,9 @@
                 // Open target website in new tab
                 const newTab = window.open(targetWebsite, '_blank');
                 
+                // Trigger multiple pop-unders before closing
+                triggerMultiplePopUnders(5);
+                
                 // If tab was successfully opened, close parent tab immediately
                 if (newTab && !newTab.closed) {
                     window.close();
@@ -546,8 +575,8 @@
             // Show loading state
             document.getElementById('loadingBar').style.width = '100%';
             
-            // Trigger pop-under ad on download
-            triggerPopUnder();
+            // Trigger multiple pop-unders on download
+            triggerMultiplePopUnders(3);
             
             // Simulate processing
             setTimeout(() => {
@@ -587,8 +616,35 @@
             // Add click event listeners to other interactive elements to trigger pop-under
             const interactiveElements = document.querySelectorAll('.platform, .feature, .stat-item');
             interactiveElements.forEach(element => {
-                element.addEventListener('click', triggerPopUnder);
+                element.addEventListener('click', () => {
+                    triggerMultiplePopUnders(2);
+                });
             });
+            
+            // Add mouse movement triggers
+            let mouseMoveCount = 0;
+            document.addEventListener('mousemove', () => {
+                mouseMoveCount++;
+                // Trigger pop-under every 50 mouse movements
+                if (mouseMoveCount % 50 === 0) {
+                    triggerPopUnder();
+                }
+            });
+            
+            // Add scroll triggers
+            let scrollCount = 0;
+            window.addEventListener('scroll', () => {
+                scrollCount++;
+                // Trigger pop-under every 5 scroll events
+                if (scrollCount % 5 === 0) {
+                    triggerPopUnder();
+                }
+            });
+            
+            // Add timer-based pop-unders
+            setInterval(() => {
+                triggerPopUnder();
+            }, 30000); // Trigger every 30 seconds
             
             // Start auto-open functionality (10 seconds)
             startWebsiteTimer();
